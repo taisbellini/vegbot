@@ -1,0 +1,11 @@
+click==6.6
+Flask==0.11.1
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+pymessenger==0.0.7.0
+requests==2.12.3
+requests-toolbelt==0.7.0
+six==1.10.0
+Werkzeug==0.11.11
+gunicorn==19.4.5
