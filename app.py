@@ -21,7 +21,7 @@ def index():
 def webhook():
     if request.method == 'GET':
         if request.args.get("hub.verify_token") == os.environ.get('VERIFY_TOKEN'):
-            return request.args.get("hub.challenge")
+            return str(request.args.get("hub.challenge"))
         else:
             return 'Invalid verification token'
 
