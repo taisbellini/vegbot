@@ -9,7 +9,7 @@ import json
 import os
 
 app = Flask(__name__)
-bot = Bot('ACCESS_TOKEN')
+bot = Bot(os.environ.get('PAGE_ACCESS_TOKEN'))
 
 
 @app.route('/')

@@ -4,7 +4,7 @@ import requests
 
 def get_places(location):
     params = {
-        'key': 'GOOGLE_KEY',
+        'key': os.environ.get('GOOGLE_KEY'),
         'keyword': 'vegan',
         'location': '{},{}'.format(location['lat'], location['long']),
         'radius': 8000,
