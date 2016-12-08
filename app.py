@@ -26,7 +26,7 @@ def webhook():
             return 'Invalid verification token'
 
     if request.method == 'POST':
-        output = json.loads(request.body)
+        output = json.loads(request.data)
 
         for event in output['entry']:
             messaging = event['messaging']
