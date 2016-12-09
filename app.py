@@ -7,6 +7,7 @@ from pymessenger.bot import Bot
 from google_places import get_places
 import json
 import os
+from itertools import islice
 
 app = Flask(__name__)
 bot = Bot(os.environ.get('PAGE_ACCESS_TOKEN'))
@@ -28,21 +29,20 @@ def webhook():
     if request.method == 'POST':
         output = json.loads(request.data)
 
-        for event in output['entry']:
-            messaging = event['messaging']
-            for x in messaging:
-                recipient_id = x['sender']['id']
-                payload = x['message']['attachments'][0]['payload'] if 'attachments' in x['message'] else None
-                if payload and 'coordinates' in payload:
-                    location = x['message']['attachments'][0]['payload']['coordinates']
-                    response = json.loads(get_places(location))
-                    bot.send_text_message(recipient_id, 'Aqui estão os restaurantes abertos perto de você:')
-                    for restaurant in response['results']:
-                        title = restaurant['name']
-                        address = restaurant['vicinity']
-                        bot.send_text_message(recipient_id, u'{}. {}'.format(title, address))
-                else:
-                    bot.send_text_message(recipient_id, 'Onde você está? Me envie sua localização.')
+        x = output['entry'][0]['messaging'][0]
+        print x
+        recipient_id = x['sender']['id']
+        payload = x['message']['attachments'][0]['payload'] if 'attachments' in x['message'] else None
+        if payload and 'coordinates' in payload:
+            location = x['message']['attachments'][0]['payload']['coordinates']
+            response = json.loads(get_places(location))
+            bot.send_text_message(recipient_id, 'Aqui estão os restaurantes abertos perto de você:')
+            for restaurant in islice(response['results'], 0, 4):
+                title = restaurant['name']
+                address = restaurant['formatted_address']
+                bot.send_text_message(recipient_id, u'{}. {}'.format(title, address))
+        else:
+            bot.send_text_message(recipient_id, 'Onde você está? Me envie sua localização.')
         return 'Success'
 
 
