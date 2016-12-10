@@ -40,7 +40,7 @@ def webhook():
                 title = restaurant['name']
                 address = restaurant['formatted_address']
                 bot.send_text_message(recipient_id, u'{}. {}'.format(title, address))
-        elif any(expr in x['message']['text'].lower for expr in ['oi', 'olá']):
+        elif any(expr in x['message']['text'].lower() for expr in ['oi', 'olá']):
             bot.send_text_message(recipient_id, 'Olá! Estou aqui para facilitar a vida no vegetarianismo! '
                                                 'Basta me enviar sua localização e eu te indicarei os restaurantes'
                                                 ' vegetarianos abertos mais próximos de você! :)')
