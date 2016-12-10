@@ -30,7 +30,6 @@ def webhook():
         output = json.loads(request.data)
 
         x = output['entry'][0]['messaging'][0]
-        print x
         recipient_id = x['sender']['id']
         payload = x['message']['attachments'][0]['payload'] if 'attachments' in x['message'] else None
         if payload and 'coordinates' in payload:
