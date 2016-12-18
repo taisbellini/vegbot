@@ -12,10 +12,33 @@ from itertools import islice
 app = Flask(__name__)
 bot = Bot(os.environ.get('PAGE_ACCESS_TOKEN'))
 
-
 @app.route('/')
 def index():
     return "Hello, World!"
+
+
+def prepare_content(recipient_id, title, location):
+    return {
+        "recipient": {"id": recipient_id},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": {
+                        "element": {
+                            "title": title,
+                            "image_url": "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center="
+                                         + location['lat'] + "," + location['long'] + "&zoom=25&markers="
+                                         + location['lat'] + "," + location['long'],
+                            "item_url": "http:\/\/maps.apple.com\/maps?q=" + location['lat'] + ","
+                                        + location['long'] + "&z=16"
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
 @app.route('/webhook', methods=['GET', 'POST'])
@@ -39,7 +62,7 @@ def webhook():
             for restaurant in islice(response['results'], 0, 4):
                 title = restaurant['name']
                 address = restaurant['formatted_address']
-                bot.send_text_message(recipient_id, u'{}. {}'.format(title, address))
+                bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), location))
         elif any(expr in x['message']['text'].lower() for expr in ['oi', u'olá', 'ola']):
             bot.send_text_message(recipient_id, 'Olá! Estou aqui para facilitar a sua vida no vegetarianismo! '
                                                 'Basta me enviar sua localização e eu te indicarei os restaurantes'
