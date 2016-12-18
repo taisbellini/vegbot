@@ -28,10 +28,10 @@ def prepare_content(recipient_id, title, location):
                     "elements": {
                         "element": {
                             "title": title,
-                            "image_url": "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center="
+                            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&center="
                                          + str(location['lat']) + "," + str(location['long']) + "&zoom=25&markers="
                                          + str(location['lat']) + "," + str(location['long']),
-                            "item_url": "http:\/\/maps.apple.com\/maps?q=" + str(location['lat']) + ","
+                            "item_url": "http://maps.apple.com/maps?q=" + str(location['lat']) + ","
                                         + str(location['long']) + "&z=16"
                         }
                     }
