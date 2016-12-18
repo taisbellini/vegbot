@@ -29,10 +29,10 @@ def prepare_content(recipient_id, title, location):
                         "element": {
                             "title": title,
                             "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&center="
-                                         + str(location['lat']) + "," + str(location['long']) + "&zoom=25&markers="
-                                         + str(location['lat']) + "," + str(location['long']),
+                                         + str(location['lat']) + "," + str(location['lng']) + "&zoom=25&markers="
+                                         + str(location['lat']) + "," + str(location['lng']),
                             "item_url": "http://maps.apple.com/maps?q=" + str(location['lat']) + ","
-                                        + str(location['long']) + "&z=16"
+                                        + str(location['lng']) + "&z=16"
                         }
                     }
                 }
@@ -62,8 +62,7 @@ def webhook():
             for restaurant in islice(response['results'], 0, 4):
                 title = restaurant['name']
                 address = restaurant['formatted_address']
-                response = bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), location))
-                print response
+                bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), restaurant['geometry']['location']))
         elif any(expr in x['message']['text'].lower() for expr in ['oi', u'olá', 'ola']):
             bot.send_text_message(recipient_id, 'Olá! Estou aqui para facilitar a sua vida no vegetarianismo! '
                                                 'Basta me enviar sua localização e eu te indicarei os restaurantes'
