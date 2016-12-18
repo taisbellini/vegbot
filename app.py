@@ -62,7 +62,8 @@ def webhook():
             for restaurant in islice(response['results'], 0, 4):
                 title = restaurant['name']
                 address = restaurant['formatted_address']
-                bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), location))
+                response = bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), location))
+                print response
         elif any(expr in x['message']['text'].lower() for expr in ['oi', u'olá', 'ola']):
             bot.send_text_message(recipient_id, 'Olá! Estou aqui para facilitar a sua vida no vegetarianismo! '
                                                 'Basta me enviar sua localização e eu te indicarei os restaurantes'
