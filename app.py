@@ -2,43 +2,17 @@
 # -*- coding: utf-8 -*-
 #!flask/bin/python
 
-from flask import Flask, request
-from pymessenger.bot import Bot
-from google_places import get_places
+from flask import Flask, request, make_response
+import StateMachine
+from google_places import get_places, get_latlong
 import json
 import os
-from itertools import islice
 
 app = Flask(__name__)
-bot = Bot(os.environ.get('PAGE_ACCESS_TOKEN'))
 
 @app.route('/')
 def index():
     return "Hello, World!"
-
-
-def prepare_content(recipient_id, title, location):
-    return {
-        "recipient": {"id": recipient_id},
-        "message": {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": {
-                        "element": {
-                            "title": title,
-                            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&center="
-                                         + str(location['lat']) + "," + str(location['lng']) + "&zoom=25&markers="
-                                         + str(location['lat']) + "," + str(location['lng']),
-                            "item_url": "http://maps.apple.com/maps?q=" + str(location['lat']) + ","
-                                        + str(location['lng']) + "&z=16"
-                        }
-                    }
-                }
-            }
-        }
-    }
 
 
 @app.route('/webhook', methods=['GET', 'POST'])
@@ -51,27 +25,27 @@ def webhook():
 
     if request.method == 'POST':
         output = json.loads(request.data)
+        print 'output', output
+        contexts = output.get('result').get('contexts', [])
+        current_state = next((item for item in contexts if item['name'] == 'state'), 'Init')
+        current_state_object = StateMachine.states_map[current_state]
+        state = current_state_object.next(output)
+        print 'next', state
+        response = StateMachine.states_map[state.get('name')].run(state)
+        print 'run response', response
 
-        x = output['entry'][0]['messaging'][0]
-        recipient_id = x['sender']['id']
-        payload = x['message']['attachments'][0]['payload'] if 'attachments' in x['message'] else None
-        if payload and 'coordinates' in payload:
-            location = x['message']['attachments'][0]['payload']['coordinates']
-            response = json.loads(get_places(location))
-            bot.send_text_message(recipient_id, 'Aqui estão os restaurantes abertos perto de você:')
-            for restaurant in islice(response['results'], 0, 4):
-                title = restaurant['name']
-                address = restaurant['formatted_address']
-                bot.send_raw(prepare_content(recipient_id, u'{}. {}'.format(title, address), restaurant['geometry']['location']))
-        elif any(expr in x['message']['text'].lower() for expr in ['oi', u'olá', 'ola']):
-            bot.send_text_message(recipient_id, 'Olá! Estou aqui para facilitar a sua vida no vegetarianismo! '
-                                                'Basta me enviar sua localização e eu te indicarei os restaurantes'
-                                                ' vegetarianos abertos mais próximos de você! :)')
-        else:
-            bot.send_text_message(recipient_id, 'Onde você está? '
-                                                'Me envie sua localização pelo app do celular ou habilite '
-                                                'essa função no navegador.')
-        return 'Success'
+        if 'speech' in response:
+            res = {
+                "speech": response['speech'],
+                "displayText": response['speech'],
+                "contextOut": [response],
+                "source": "VegBot"
+            }
+
+            response = make_response(json.dumps(res))
+            response.headers['Content-Type'] = 'application/json'
+            return response
+    return 'Done'
 
 
 if __name__ == '__main__':
